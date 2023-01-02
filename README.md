@@ -1,5 +1,5 @@
 # Projet Final - Cours GNU/Linux B2 Ynov Aix
-Benjamin Borello - Ynov Aix 2022/2023
+Benjamin Borello
 
 ## Sommaire
 1. Creation VMs
@@ -13,31 +13,32 @@ Benjamin Borello - Ynov Aix 2022/2023
     * Carte reseau
     * Firewall / Ports
     * Apache2
+1. Resultats
 
 
 ## Creations VMs
-Avant de commencer a configurer les machines virtuelles nous devont creer un reseau virtuel local qui representera le reseau "Back" : **VMNet2**
+Avant de commencer à configurer les machines virtuelles nous devons créer un réseau virtuel local qui representera le reseau _Back_ : **VMNet2**
 ![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/01%20config%20vm%20proxy/Capture%20d%E2%80%99%C3%A9cran%202023-01-01%20203751.png?raw=true)
 
 ### Serveur HAProxy
-Pour le serveur HAProxy nous creons une vm Debian 11 classique. Nous devons toutefois lui ajouter une seconde carte reseau.
-La premiere est configure en _bridge_ et la seconde sur le reseau virtuel precedement cree _Host-only : (VMNet2)_.
+Pour le serveur HAProxy nous créons une vm Debian 11 classique. Nous devons toutefois lui ajouter une seconde carte réseau.  
+La première est configurée en _bridge_ et la seconde sur le reseau virtuel précedement créé _Host-only : (VMNet2)_.
 ![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/01%20config%20vm%20proxy/Capture%20d%E2%80%99%C3%A9cran%202023-01-01%20204310.png?raw=true)
 
 ### Serveurs Web
-Pour les serveurs web nous nous contenterons de n'en creer et configurer qu'un seul. Une fois la configuration termine il nous suffira de le cloner puis de modifier l'ip statique du clone.
-Les VMs sont egalement sur Debian 11. Cependant elles n'ont qu'une seule carte reseau configurer sur  _Host-only : (VMNet2)_.
+Pour les serveurs web nous nous contenterons de n'en configurer qu'un seul. Une fois la configuration terminé il nous suffira de le cloner puis de modifier l'ip statique du clone.  
+Les VMs sont egalement sur Debian 11. Cependant elles n'ont qu'une seule carte réseau configurer sur  _Host-only : (VMNet2)_.
 ![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/03%20config%20vm%20server/Capture%20d%E2%80%99%C3%A9cran%202023-01-01%20215450.png?raw=true)
 
 ## Configuration serveur HAProxy
-### Carte reseau
-Nous debutons par la configuration des cartes reseau du serveur.
+### Carte réseau
+Nous débutons par la configuration des cartes réseau du serveur.
 ![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/Capture%20d%E2%80%99%C3%A9cran%202023-01-02%20041621.png?raw=true)
-L'ip de la route par defaut correspond a la passerelle par defaut de l'ordinateur hebergeant les VMs. Cela permet l'acces a internet sur les differents machines vituelles. 
+L'ip de la route par défaut correspond a la passerelle par défaut de l'ordinateur hébergeant les VMs. Cela permet l'accés à internet sur les différentes machines vituelles. 
 Les serveurs DNS sont en automatique.
 
 ### Firewall / Ports
-Nous devons desormais ouvrir le port 80 afin de pouvoir a l'avenir acceder au site web heberger sur les serveurs :
+Nous devons désormais ouvrir le port 80 afin de pouvoir à l'avenir accéder au site web heberger sur les serveurs :
 ``` shell
 $ sudo apt install ufw
 [...]
@@ -54,15 +55,15 @@ To              Action      From
 80/tcp (v6)     ALLOW       Anywhere (v6)
 ```
 Dans l'ordre des commandes :
-* Installe le services de gestion simplifie de firewall : _Uncomplicated FireWall_.
+* Installe le services de gestion simplifié de firewall : _Uncomplicated FireWall_.
 * Active UFW.
 * Ouvre le port 80 utilisant le protocole TCP. Le port  80 correspond au port standard du protocole HTTP. TCP est le protocole le plus utilise pour ce type de communication. 
-* Verifie que UFW est correctement execute et que les nouvelles regles sont bien appliques.
+* Verifie que UFW est correctement executé et que les nouvelles règles sont bien appliqués.
 
-Nous pourrions egalement ouvrir le port 443 a la place du 80 pour n'autoriser que les connexions securiser utilisant le protocole HTTPS.
+Nous pourrions également ouvrir le port 443 à la place du 80 pour n'autoriser que les connexions sécuriser utilisant le protocole HTTPS.
 
 ### HAProxy
-Nous pouvons desormais installer HAProxy :
+Nous pouvons désormais installer HAProxy :
 ``` shell
 $ sudo apt install haproxy
 [...]
@@ -72,7 +73,7 @@ Puis nous le configurons :
 $ sudo vi /etc/haproxy/haproxy.cfg 
 ```
 
-Nous rajoutons les lignes suivantes a la fin du fichier de configuration :
+Nous rajoutons les lignes suivantes à la fin du fichier de configuration :
 ```
 # FRONTEND
 frontend apache_front
@@ -92,26 +93,27 @@ backend apache_backend_servers
         server             backend02 192.168.2.102:80 check
 
 ```
-_roundrobin_ a chaque connection le serveur propose alternera.
-Il existe d'autre algorithme plus efficace (qui peuvent rediriger sur le serveur avec le moins de connection par exemple) mais nous choisisons celui-ci pour faciliter les tests.
+_roundrobin_ : à chaque connexion, le serveur proposé alternera.  
+1 -> 2 -> 1 -> 2 -> ...  
+Il éxiste d'autres algorithmes plus efficace mais nous choisisons celui-ci pour faciliter les tests.
 
 ``` shell
 $ sudo systemctl restart haproxy
 ```
-Nous pouvons enfin redemarrer HAProxy afin d'appliquer les changement que nous venons d'effectuer.
+Nous pouvons enfin redémarrer HAProxy afin d'appliquer les changements que nous venons d'effectuer.
 
 ```shell
 $ sudo haproxy -c -f /etc/haproxy/haproxy.cfg
 ```
-Cette commande peut nous permettre de verifier que nous n'avons pas commis d'erreur lors de la configuration.
+Cette commande peut nous permettre de vérifier que nous n'avons pas commis d'erreurs lors de la configuration.
 
 ## Configuration serveur Apache2
 ### Carte reseau
 ![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/Capture%20d%E2%80%99%C3%A9cran%202023-01-02%20045346.png?raw=true)  
-La route par defaut correspond a l'ip de la carte reseau _Back_ du serveur HAProxy.
+La route par defaut correspond à l'ip de la carte reseau _Back_ du serveur HAProxy.
 
 ### Firewall / Ports
-La configuration du firewall a l'aide d'ufw est strictement la meme a celle du serveur HAProxy.
+La configuration du firewall a l'aide d'ufw est strictement la meme que celle du serveur HAProxy.
 
 ### Apache2
 Pour commencer nous devons installer Apache2 :
@@ -119,7 +121,7 @@ Pour commencer nous devons installer Apache2 :
 $ sudo apt install apache2
 ```
 
-Nous creons ensuite un hote virtuel :
+Nous créons ensuite un hôte virtuel :
 ``` shell
 $ sudo mkdir -p /var/www/nom_de_domaine
 $ sudo vi /var/www/nom_de_domaine/index.html
@@ -142,7 +144,7 @@ Dans l'ordre des commandes :
 </VirtualHost>
 ```
 
-Desormais nous devons activer le nouvel hote virtuel et desactiver celui par defaut proposer par Apache :
+Désormais nous devons activer le nouvel hôte virtuel et désactiver celui par defaut proposé par Apache :
 ``` shell
 $ sudo a2ensite nom_de_domaine.conf
 $ sudo a2dissite 000-default.conf
@@ -156,5 +158,6 @@ $ sudo systemctl restart apache2
 
 
 ---
+## Resultats
 ![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/Capture%20d%E2%80%99%C3%A9cran%202023-01-02%20051147.png?raw=true)  
 ![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/Capture%20d%E2%80%99%C3%A9cran%202023-01-02%20051158.png?raw=true)  
