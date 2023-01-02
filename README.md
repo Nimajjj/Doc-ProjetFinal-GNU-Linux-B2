@@ -106,4 +106,49 @@ $ sudo haproxy -c -f /etc/haproxy/haproxy.cfg
 Cette commande peut nous permettre de verifier que nous n'avons pas commis d'erreur lors de la configuration.
 
 ## Configuration serveur Apache2
+### Carte reseau
+![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/Capture%20d%E2%80%99%C3%A9cran%202023-01-02%20045346.png?raw=true)  
+La route par defaut correspond a l'ip de la carte reseau _Back_ du serveur HAProxy.
 
+### Firewall / Ports
+La configuration du firewall a l'aide d'ufw est strictement la meme a celle du serveur HAProxy.
+
+### Apache2
+Pour commencer nous devons installer Apache2 :
+``` shell
+$ sudo apt install apache2
+```
+
+Nous creons ensuite un hote virtuel :
+``` shell
+$ sudo mkdir -p /var/www/nom_de_domaine
+$ sudo vi /var/www/nom_de_domaine/index.html
+$ sudo vi /etc/apache2/sites-available/nom_de_domaine.conf
+```
+Dans l'ordre des commandes :
+* Creation du repertoire qui contiendra tous les fichiers du site web
+* Creation d'un fichier html basique
+* Creation du fichier de configuration de l'hote virtuel
+
+> /etc/apache2/sites-available/nom_de_domaine.conf :
+``` 
+<VirtualHost *:80>
+    ServerAdmin admin@nom_de_domaine
+    ServerName nom_de_domaine
+    ServerAlias www.nom_de_domaine
+    DocumentRoot /var/www/nom_de_domaine
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+Desormais nous devons activer le nouvel hot virtuel et desactiver celui par defaut proposer par Apache :
+``` shell
+$ sudo a2ensite nom_de_domaine.conf
+$ sudo a2dissite 000-default.conf
+```
+
+Pour finir nous redemarrons Apache afin d'appliquer les nouveaux changements :
+``` shell
+$ sudo systemctl restart apache2
+```
