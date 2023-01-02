@@ -13,4 +13,4 @@ Benjamin Borello | Ynov Aix 2022/2023
 ### Serveurs Web
 
 ## Configuration serveur Apache2
-## Configuration HAProxy# Doc-ProjetFinal-GNU-Linux-B2
+## Configuration HAProxy
