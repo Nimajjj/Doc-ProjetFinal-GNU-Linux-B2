@@ -142,7 +142,7 @@ Dans l'ordre des commandes :
 </VirtualHost>
 ```
 
-Desormais nous devons activer le nouvel hot virtuel et desactiver celui par defaut proposer par Apache :
+Desormais nous devons activer le nouvel hote virtuel et desactiver celui par defaut proposer par Apache :
 ``` shell
 $ sudo a2ensite nom_de_domaine.conf
 $ sudo a2dissite 000-default.conf
@@ -152,3 +152,9 @@ Pour finir nous redemarrons Apache afin d'appliquer les nouveaux changements :
 ``` shell
 $ sudo systemctl restart apache2
 ```
+
+
+
+---
+![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/Capture%20d%E2%80%99%C3%A9cran%202023-01-02%20051147.png?raw=true)  
+![](https://github.com/Nimajjj/Doc-ProjetFinal-GNU-Linux-B2/blob/main/Capture%20d%E2%80%99%C3%A9cran%202023-01-02%20051158.png?raw=true)  
